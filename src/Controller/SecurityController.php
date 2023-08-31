@@ -6,8 +6,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Address;
 
 class SecurityController extends AbstractController
 {
@@ -35,6 +37,7 @@ class SecurityController extends AbstractController
     #[Route('/room/mail', name: 'mail_room')]
     public function sendEmail(MailerInterface $mailer): Response
     {
+        /*
         $email = (new Email())
                ->from('hello@example.com')
                ->to('OccultDebugger@yandex.ru')
@@ -42,7 +45,18 @@ class SecurityController extends AbstractController
                ->text('duck the system from Symfony')
                ->html('<p>duck the system from syfmony</p>');
         $mailer->send($email);
+        */
 
+        $email = (new TemplatedEmail())
+               ->from('duck@example.com')
+               ->to(new Address('OccultDebugger@yandex.ru'))
+               ->subject('Thanks for signing up!')
+               ->htmlTemplate('emails/signup.html.twig')
+               ->context([
+                   'expiration_date' => new \DateTime('+7 days'),
+                   'username' => 'root',
+               ]);
+        
         return new Response('success');
     }
 }
