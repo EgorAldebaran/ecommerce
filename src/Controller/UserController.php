@@ -17,10 +17,19 @@ use App\Security\UserAuthenticator;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Entity\User;
+use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 
 
 class UserController extends AbstractController
 {
+    private $tokenGenerator;
+
+    public function __construct(TokenGeneratorInterface $tokenGenerator)
+    {
+        $this->tokenGenerator = $tokenGenerator;
+    }
+    
     #[Route('/room/register', name: 'register_room')]
     public function registerRoom(Request $request, UserPasswordHasherInterface $userPasswordHasher,UserAuthenticatorInterface $userAuthenticator, UserAuthenticator $authenticator, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
     {
@@ -66,6 +75,24 @@ class UserController extends AbstractController
     public function guestRoom(): Response
     {
         return $this->render('preregistration/guest.html.twig');
+    }
+
+    #[Route('/room/station', name: 'station_room')]
+    public function stationRoom(): Response
+    {
+        $token = $this->tokenGenerator->generateToken();
+        $url = $this->generateUrl('verify_email_room', ['token' => $token], UrlGenerator::ABSOLUTE_URL);
+        dd($url);
+
+        
+        return new Response('station');
+    }
+
+
+    #[Route('/room/verify-email', name: 'verify_email_room')]
+    public function verifyEmailRoom(): Response
+    {
+        return new Response('verify email room');
     }
 
 }
